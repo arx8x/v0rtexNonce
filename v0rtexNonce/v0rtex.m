@@ -53,7 +53,7 @@ if (strcmp(u.version, "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:34 PDT 201
 #define OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         0xfffffff006e7c9f8
 #define OFFSET_ROP_ADD_X0_X0_0x10                   0xfffffff0064b1398
 }
-if (strcmp(u.version, "Darwin Kernel Version 16.5.0: Thu Feb 23 23:22:54 PST 2017; root:xnu-3789.52.2~7\/RELEASE_ARM64_S5L8960X") == 0) //iPhone6,2(and iPhone6,1 I think) iOS 10.3.1
+if (strcmp(u.version, "Darwin Kernel Version 16.5.0: Thu Feb 23 23:22:54 PST 2017; root:xnu-3789.52.2~7\/RELEASE_ARM64_S5L8960X") == 0) //iPhone6,1 and iPhone 6,2 iOS 10.3.1
 {
 #define OFFSET_ZONE_MAP                             0xfffffff00754c478
 #define OFFSET_KERNEL_MAP                           0xfffffff0075a8050
