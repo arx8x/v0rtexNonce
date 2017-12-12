@@ -5,16 +5,6 @@
 
 #include "common.h"
 
-
-
-
-
-
-
 kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide);
-
-
-
-
 
 #endif

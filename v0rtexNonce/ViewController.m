@@ -6,9 +6,8 @@
 //  Copyright © 2017 ninja. All rights reserved.
 //
 
-
+#include "set.h"
 #import "ViewController.h"
-
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *generatorLabel;
@@ -18,7 +17,7 @@
 @implementation ViewController
 - (IBAction)generatorInputActionTrigger:(id)sender
 {
-    const char *generator = [_generatorInput.text UTF8String];
+    char *generator = [_generatorInput.text UTF8String];
     char compareString[22];
     char generatorToSet[22];
     uint64_t rawGeneratorValue;

@@ -76,7 +76,6 @@
 		BC31D2F21FDF61020065D9B4 /* v0rtex.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = v0rtex.m; sourceTree = "<group>"; };
 		BC31D2F41FDF61100065D9B4 /* v0rtex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = v0rtex.h; sourceTree = "<group>"; };
 		BC31D2F51FDF622A0065D9B4 /* common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
-		BCB637DC1FDFCC3000274A25 /* offsets.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = offsets.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,7 +137,6 @@
 				BC31D2F41FDF61100065D9B4 /* v0rtex.h */,
 				BC31D2D81FDF593C0065D9B4 /* find.m */,
 				BC31D2DE1FDF593D0065D9B4 /* mach-o.h */,
-				BCB637DC1FDFCC3000274A25 /* offsets.m */,
 				BC31D2F21FDF61020065D9B4 /* v0rtex.m */,
 				BC31D2D91FDF593C0065D9B4 /* nvpatch.h */,
 				BC31D2DC1FDF593D0065D9B4 /* nvpatch.m */,
