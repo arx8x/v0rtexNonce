@@ -43,7 +43,7 @@ char *iPhone7plus_1032 = "";
 char *iPhone7plus_1031 = "";
 
 char *iPhone6_1033 = "Darwin Kernel Version 16.7.0: Thu Jun 15 18:33:36 PDT 2017; root:xnu-3789.70.16~4/RELEASE_ARM64_T7000";
-char *iPhone6_1032 = "";/****/
+char *iPhone6_1032 = "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:35 PDT 2017; root:xnu-3789.60.24~24/RELEASE_ARM64_T7000";/****/
 char *iPhone6_1031 = "";
 
 char *iPhone6plus_1033 = "Darwin Kernel Version 16.7.0: Thu Jun 15 18:33:36 PDT 2017; root:xnu-3789.70.16~4/RELEASE_ARM64_T7000";
@@ -72,6 +72,24 @@ void load_offsets(void)
     struct utsname sysinfo;
     uname(&sysinfo);
     const char *kern_version = sysinfo.version;
+
+    if(!strcmp(kern_version, iphone6_1032))
+    {
+      OFFSET_ZONE_MAP                             = 0xfffffff007558478;
+      OFFSET_KERNEL_MAP                           = 0xfffffff0075b4050;
+      OFFSET_KERNEL_TASK                          = 0xfffffff0075b4048;
+      OFFSET_REALHOST                             = 0xfffffff00753aba0;
+      OFFSET_BZERO                                = 0xfffffff00708df80;
+      OFFSET_BCOPY                                = 0xfffffff00708ddc0;
+      OFFSET_COPYIN                               = 0xfffffff00718d37c;
+      OFFSET_COPYOUT                              = 0xfffffff00718d570;
+      OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070a60b4;
+      OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070b938c;
+      OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070a5bd8;
+      OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006eee1b8;
+      //OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b2174;
+      OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff006642c90;
+    }
 
     if(!strcmp(kern_version, iPhone6s_1032))
     {
