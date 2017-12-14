@@ -66,6 +66,9 @@ char *iPhone5s_1033 = "Darwin Kernel Version 16.7.0: Thu Jun 15 18:33:35 PDT 201
 char *iPhone5s_1032 = "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:35 PDT 2017; root:xnu-3789.60.24~24/RELEASE_ARM64_S5L8960X";
 char *iPhone5s_1031 = "Darwin Kernel Version 16.5.0: Thu Feb 23 23:22:54 PST 2017; root:xnu-3789.52.2~7/RELEASE_ARM64_S5L8960X";
 
+char *iPadmini2_1033 = "";
+char *iPadmini2_1032 = "";
+char *iPadmini2_1031 = "";
 
 void load_offsets(void)
 {
