@@ -56,9 +56,9 @@ char *iPhone6s_1031 = "";
 
 char *iPhone6splus_1033 = "Darwin Kernel Version 16.7.0: Thu Jun 15 18:33:36 PDT 2017; root:xnu-3789.70.16~4/RELEASE_ARM64_S8000";
 char *iPhone6splus_1032 = "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:34 PDT 2017; root:xnu-3789.60.24~24/RELEASE_ARM64_S8000";
-char *iPhone6splus_1031 = "";
+char *iPhone6splus_1031 = "Darwin Kernel Version 16.7.0: Thu Jun 15 18:33:36 PDT 2017; root:xnu-3789.70.16~4/RELEASE_ARM64_S8000";
 
-char *iPhoneSE_1033 = "";
+char *iPhoneSE_1033 = "Darwin Kernel Version 16.7.0: Thu Jun 15 18:33:36 PDT 2017; root:xnu-3789.70.16~4/RELEASE_ARM64_S8000";
 char *iPhoneSE_1032 = "Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:34 PDT 2017; root:xnu-3789.60.24~24/RELEASE_ARM64_S8000";
 char *iPhoneSE_1031 = "";
 
