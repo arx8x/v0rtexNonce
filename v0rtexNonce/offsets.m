@@ -68,7 +68,7 @@ char *iPhone5s_1031 = "Darwin Kernel Version 16.5.0: Thu Feb 23 23:22:54 PST 201
 
 char *iPadmini2_1033 = "";
 char *iPadmini2_1032 = "";
-char *iPadmini2_1031 = "";
+char *iPadmini2_1031 = "Darwin Kernel Version 16.5.0: Thu Feb 23 23:22:54 PST 2017; root:xnu-3789.52.2~7/RELEASE_ARM64_S5L8960X";
 
 void load_offsets(void)
 {
@@ -309,6 +309,21 @@ void load_offsets(void)
       // OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0063c5398;
       OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064fb0a8;
     }
+    if(!strcmp(kern_version, iPadmini2_1031))
+    {
+      OFFSET_COPYIN                               = 0xfffffff007181218;
+      OFFSET_KERNEL_TASK                          = 0xfffffff0075a8048;
+      OFFSET_REALHOST                             = 0xfffffff00752eba0;
+      OFFSET_BZERO                                = 0xfffffff007081f80;
+      OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070ad1d4;
+      OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064fd174;
+      OFFSET_COPYOUT                              = 0xfffffff00718140c;
+      OFFSET_ZONE_MAP                             = 0xfffffff00754c478;
+      OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff007099f7c;
+      OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006f2e338;
+      OFFSET_KERNEL_MAP                           = 0xfffffff0075a8050;
+      OFFSET_BCOPY                                = 0xfffffff007081dc0;
+      OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff007099aa0;
 
 
     LOG("%s", kern_version);
