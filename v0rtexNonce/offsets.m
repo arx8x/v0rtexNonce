@@ -36,7 +36,7 @@ UInt64 OFFSET_ROP_ADD_X0_X0_0x10;
 
 
 /**--READ BEFORE YOU ADD OFFSETS--**/
-//certain models have the same kernelcache. For example, iPhone6,1 and iPhone 6,1 (iPhone 5s global and GSM)
+//certain models have the same kernelcache. For example, iPhone6,1 and iPhone6,2 (iPhone 5s GSM and global)
 //they both have the same ipsw and same kernelcache. Such models should be combined with an OR logic
 //check how iPhone 7 and 5s models are combined
 //This file has conditions for all devices that have 10.3 or above, including 32 bit ones
