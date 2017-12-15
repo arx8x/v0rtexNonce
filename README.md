@@ -21,7 +21,7 @@ Keep in mind that this is still experimental. The exploit might take a number of
 
 **Example log (success)**
 
-` [Accessibility] ****************** Loading GAX Client Bundle ****************
+```
   uid isn't 0
 
   Darwin Kernel Version 16.6.0: Mon Apr 17 17:33:34 PDT 2017; root:xnu-3789.60.24~24/RELEASE_ARM64_S8000
@@ -146,4 +146,4 @@ Keep in mind that this is still experimental. The exploit might take a number of
   Successfully patched permissions for variable "com.apple.System.boot-nonce"
 
   current generator: 0xfeedfacebadf00d0
-`
+```
