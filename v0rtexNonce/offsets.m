@@ -319,8 +319,19 @@ void load_offsets(void)
      	//10.3.3
     	if(!strcmp(version, "14G60"))
     	{
-    		LOG("10.3.3 - 14G60 offsets not found for %s", device);
-    		exit(1);
+    		OFFSET_ZONE_MAP                             = 0xfffffff00754c478;
+    		OFFSET_KERNEL_MAP                           = 0xfffffff0075a8050;
+    		OFFSET_KERNEL_TASK                          = 0xfffffff0075a8048;
+    		OFFSET_REALHOST                             = 0xfffffff00752eba0;
+    		OFFSET_BZERO                                = 0xfffffff007081f80;
+    		OFFSET_BCOPY                                = 0xfffffff007081dc0;
+    		OFFSET_COPYIN                               = 0xfffffff007180e98;
+    		OFFSET_COPYOUT                              = 0xfffffff00718108c;
+    		OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff007099f14;
+    		OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070ad1ec;
+    		OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff007099a38;
+    		OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006f2e338;
+    		OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064fe174;
     	}
 
     	//10.3.2
