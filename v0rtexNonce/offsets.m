@@ -749,11 +749,22 @@ void load_offsets(void)
     		exit(1);
     	}
 
-    	//10.3.1
+    	//10.3.1 - not tested
     	if(!strcmp(version, "14E304"))
     	{
-    		LOG("10.3.1 - 14E304 offsets not found for %s", device);
-    		exit(1);
+            OFFSET_ZONE_MAP                             = 0xfffffff007558478;
+            OFFSET_KERNEL_MAP                           = 0xfffffff0075b4050;
+            OFFSET_KERNEL_TASK                          = 0xfffffff0075b4048;
+            OFFSET_REALHOST                             = 0xfffffff00753aba0;
+            OFFSET_BZERO                                = 0xfffffff00708df80;
+            OFFSET_BCOPY                                = 0xfffffff00708ddc0;
+            OFFSET_COPYIN                               = 0xfffffff00718d3a8;
+            OFFSET_COPYOUT                              = 0xfffffff00718d59c;
+            OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070a611c;
+            OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070b9374;
+            OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070a5c40;
+            OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006eee1b8;
+            OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b5174;
     	}
 
     	//10.3
@@ -1270,7 +1281,8 @@ void load_offsets(void)
     		OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b1398;
     	}
 
-    	//10.3.1
+        //10.3.1 - not tested
+        //if doesn't work - find bottom two
     	if(!strcmp(version, "14E304"))
     	{
             //these are the same as 6s plus, except for the bottom two.
@@ -1317,7 +1329,8 @@ void load_offsets(void)
     		exit(1);
     	}
 
-    	//10.3.1
+    	//10.3.1 - not tested
+        //if doesn't work - find bottom two
     	if(!strcmp(version, "14E304"))
     	{
             //these are the same as 6s, except for the bottom two.
@@ -1473,6 +1486,44 @@ void load_offsets(void)
     //iPhone 7 Plus
     if(!strcmp(device, "iPhone9,4") || !strcmp(device, "iPhone9,2"))
     {
+        //10.1.1 - not tested
+        if(!strcmp(version, "14B150") || !strcmp(version, "14B100"))
+        {
+            //same as 10.2?
+            OFFSET_ZONE_MAP                             = 0xfffffff007558478;
+            OFFSET_KERNEL_MAP                           = 0xfffffff0075b4050;
+            OFFSET_KERNEL_TASK                          = 0xfffffff0075b4048;
+            OFFSET_REALHOST                             = 0xfffffff00753aba0;
+            OFFSET_BZERO                                = 0xfffffff00708df80;
+            OFFSET_BCOPY                                = 0xfffffff00708ddc0;
+            OFFSET_COPYIN                               = 0xfffffff00718d3a8;
+            OFFSET_COPYOUT                              = 0xfffffff00718d59c;
+            OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070a611c;
+            OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070b9374;
+            OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070a5c40;
+            OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006eee1b8;
+            OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b5174;
+        }
+        
+        //10.2 - not tested
+        if(!strcmp(version, "14C92"))
+        {
+            //same as 10.1.1?
+            OFFSET_ZONE_MAP                             = 0xfffffff007558478;
+            OFFSET_KERNEL_MAP                           = 0xfffffff0075b4050;
+            OFFSET_KERNEL_TASK                          = 0xfffffff0075b4048;
+            OFFSET_REALHOST                             = 0xfffffff00753aba0;
+            OFFSET_BZERO                                = 0xfffffff00708df80;
+            OFFSET_BCOPY                                = 0xfffffff00708ddc0;
+            OFFSET_COPYIN                               = 0xfffffff00718d3a8;
+            OFFSET_COPYOUT                              = 0xfffffff00718d59c;
+            OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070a611c;
+            OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070b9374;
+            OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070a5c40;
+            OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006eee1b8;
+            OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b5174;
+        }
+        
      	//10.3.3
     	if(!strcmp(version, "14G60"))
     	{
