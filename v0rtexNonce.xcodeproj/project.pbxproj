@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		042001B51FEC736200823F24 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 042001B41FEC736200823F24 /* README.md */; };
 		BC31D2A61FDF57D90065D9B4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BC31D2A51FDF57D90065D9B4 /* AppDelegate.m */; };
 		BC31D2A91FDF57D90065D9B4 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BC31D2A81FDF57D90065D9B4 /* ViewController.m */; };
 		BC31D2AC1FDF57D90065D9B4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BC31D2AA1FDF57D90065D9B4 /* Main.storyboard */; };
@@ -41,6 +42,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		042001B41FEC736200823F24 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		BC31D2A11FDF57D90065D9B4 /* v0rtexNonce.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = v0rtexNonce.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC31D2A41FDF57D90065D9B4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		BC31D2A51FDF57D90065D9B4 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 		BC31D2981FDF57D90065D9B4 = {
 			isa = PBXGroup;
 			children = (
+				042001B41FEC736200823F24 /* README.md */,
 				BC31D2A31FDF57D90065D9B4 /* v0rtexNonce */,
 				BC31D2BC1FDF57D90065D9B4 /* v0rtexNonceTests */,
 				BC31D2C71FDF57D90065D9B4 /* v0rtexNonceUITests */,
@@ -334,6 +337,7 @@
 				BC31D2B41FDF57D90065D9B4 /* main.m in Sources */,
 				BC31D2F31FDF61020065D9B4 /* v0rtex.m in Sources */,
 				BC31D2E01FDF593D0065D9B4 /* find.m in Sources */,
+				042001B51FEC736200823F24 /* README.md in Sources */,
 				BC31D2A61FDF57D90065D9B4 /* AppDelegate.m in Sources */,
 				BC31D2E11FDF593D0065D9B4 /* exploit64.m in Sources */,
 			);
