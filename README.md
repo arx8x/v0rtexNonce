@@ -18,6 +18,8 @@ If you wish to add offsets to this project, please read the note I left in offse
 
 Keep in mind that this is still experimental. The exploit might take a number of tries to succeed. Just keep trying. At one point, I had to try more than 20 time in a row.
 
+Make sure to have Xcode 9 or higher to compile!
+
 
 **Example log (success)**
 
