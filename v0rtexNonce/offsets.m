@@ -763,19 +763,19 @@ void load_offsets(void)
     	//10.3.1 - not tested
     	if(!strcmp(version, "14E304"))
     	{
-            OFFSET_ZONE_MAP                             = 0xfffffff007558478;
-            OFFSET_KERNEL_MAP                           = 0xfffffff0075b4050;
-            OFFSET_KERNEL_TASK                          = 0xfffffff0075b4048;
-            OFFSET_REALHOST                             = 0xfffffff00753aba0;
-            OFFSET_BZERO                                = 0xfffffff00708df80;
-            OFFSET_BCOPY                                = 0xfffffff00708ddc0;
-            OFFSET_COPYIN                               = 0xfffffff00718d3a8;
-            OFFSET_COPYOUT                              = 0xfffffff00718d59c;
-            OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070a611c;
-            OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070b9374;
-            OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070a5c40;
-            OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006eee1b8;
-            OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b5174;
+    		OFFSET_ZONE_MAP                             = 0xfffffff007558478;
+    		OFFSET_KERNEL_MAP                           = 0xfffffff0075b4050;
+    		OFFSET_KERNEL_TASK                          = 0xfffffff0075b4048;
+    		OFFSET_REALHOST                             = 0xfffffff00753aba0;
+    		OFFSET_BZERO                                = 0xfffffff00708df80;
+    		OFFSET_BCOPY                                = 0xfffffff00708ddc0;
+    		OFFSET_COPYIN                               = 0xfffffff00718d3a8;
+    		OFFSET_COPYOUT                              = 0xfffffff00718d59c;
+    		OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070a611c;
+    		OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070b9374;
+    		OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070a5c40;
+    		OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006eee1b8;
+    		OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b5174;
     	}
 
     	//10.3
@@ -1160,19 +1160,19 @@ void load_offsets(void)
     	//10.3.1
     	if(!strcmp(version, "14E304"))
     	{
-            OFFSET_ZONE_MAP                             = 0xFFFFFFF007558478;
-            OFFSET_KERNEL_MAP                           = 0xFFFFFFF0075B4050;
-            OFFSET_KERNEL_TASK                          = 0xFFFFFFF0075B4048;
-            OFFSET_REALHOST                             = 0xFFFFFFF00753ABA0;
-            OFFSET_BZERO                                = 0xFFFFFFF00708DF80;
-            OFFSET_BCOPY                                = 0xFFFFFFF00708DDC0;
-            OFFSET_COPYIN                               = 0xFFFFFFF00718D3A8;
-            OFFSET_COPYOUT                              = 0xFFFFFFF00718D59C;
-            OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xFFFFFFF0070A611C;
-            OFFSET_IPC_KOBJECT_SET                      = 0xFFFFFFF0070B9374;
-            OFFSET_IPC_PORT_MAKE_SEND                   = 0xFFFFFFF0070A5C40;
-            OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xFFFFFFF006EEE1B8;
-            OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b5174;
+    		OFFSET_ZONE_MAP                             = 0xfffffff007558478;
+    		OFFSET_KERNEL_MAP                           = 0xfffffff0075b4050;
+    		OFFSET_KERNEL_TASK                          = 0xfffffff0075b4048;
+    		OFFSET_REALHOST                             = 0xfffffff00753aba0;
+    		OFFSET_BZERO                                = 0xfffffff00708df80;
+    		OFFSET_BCOPY                                = 0xfffffff00708ddc0;
+    		OFFSET_COPYIN                               = 0xfffffff00718d3a8;
+    		OFFSET_COPYOUT                              = 0xfffffff00718d59c;
+    		OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070a611c;
+    		OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070b9374;
+    		OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070a5c40;
+    		OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006eee1b8;
+    		OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b5174;
     	}
 
     	//10.3
@@ -1595,7 +1595,24 @@ void load_offsets(void)
     		LOG("10.3 - 14E277 offsets not found for %s", device);
     		exit(1);
     	}
-
+        
+        //10.2, 10.1.1
+    	if(!strcmp(version, "14B150") || !strcmp(version, "14B100") || !strcmp(version, "14C92"))
+    	{
+    		OFFSET_ZONE_MAP                             = 0xfffffff007558478;
+    		OFFSET_KERNEL_MAP                           = 0xfffffff0075b4050;
+    		OFFSET_KERNEL_TASK                          = 0xfffffff0075b4048;
+    		OFFSET_REALHOST                             = 0xfffffff00753aba0;
+    		OFFSET_BZERO                                = 0xfffffff00708df80;
+    		OFFSET_BCOPY                                = 0xfffffff00708ddc0;
+    		OFFSET_COPYIN                               = 0xfffffff00718d3a8;
+    		OFFSET_COPYOUT                              = 0xfffffff00718d59c;
+    		OFFSET_IPC_PORT_ALLOC_SPECIAL               = 0xfffffff0070a611c;
+    		OFFSET_IPC_KOBJECT_SET                      = 0xfffffff0070b9374;
+    		OFFSET_IPC_PORT_MAKE_SEND                   = 0xfffffff0070a5c40;
+    		OFFSET_IOSURFACEROOTUSERCLIENT_VTAB         = 0xfffffff006eee1b8;
+    		OFFSET_ROP_ADD_X0_X0_0x10                   = 0xfffffff0064b5174;
+    	}
 
     }
 
