@@ -33,7 +33,12 @@
             sscanf(generator, "0x%16llx", &rawGeneratorValue);
             sprintf(compareString, "0x%llx", rawGeneratorValue);
             break;
-            
+        
+        case 19:
+            sscanf(generator, "0x%17llx", &rawGeneratorValue);
+            sprintf(compareString, "0x%llx", rawGeneratorValue);
+            break;
+        
         default:
             LOG("Invalid generator\n");
             [[[UIAlertView alloc]
