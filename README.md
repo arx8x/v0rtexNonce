@@ -1,3 +1,5 @@
+**I've added offsets for all devices and versions. This is experimental and I will be replacing some of them with confirmed ones from previous commits**
+
 # v0rtexNonce
 
 Read or set generator(com.apple.System.boot-nonce variable) using siguza's v0rtex exploit.
